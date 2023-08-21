@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data Client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .tables-container {
+            display: flex;
+            gap: 20px;
+        }
+        .table-wrapper {
+            flex: 1;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-Time Data Client</h1>
+    <div class="tables-container">
+        <div class="table-wrapper">
+            <h2>Left Table</h2>
+            <table id="leftTable">
+                <thead>
+                    <tr>
+                        <th>Price</th>
+                        <th>Amount</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="table-wrapper">
+            <h2>Right Table</h2>
+            <table id="rightTable">
+                <thead>
+                    <tr>
+                        <th>Market</th>
+                        <th>Change</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:44334/realtimehub")  // Use the full HTTPS URL
+            .build();
+
+        // Update the tables with the received data
+        connection.on("SendRealTimeData", data => {
+            console.log("Received real-time data:", data);
+            updateLeftTable(data.left);
+            updateRightTable(data.right);
+        });
+
+        // Start the connection
+        async function startConnection() {
+            try {
+                await connection.start();
+                console.log("Connection established.");
+                // Subscribe to real-time updates
+                await connection.invoke("SubscribeToRealTimeUpdates");
+            } catch (err) {
+                console.error("Connection error:", err);
+            }
+        }
+
+        // Retry connection if it's lost
+        connection.onclose(() => {
+            console.log("Connection closed. Retrying...");
+            setTimeout(() => startConnection(), 1000);
+        });
+
+        // Start the connection when the page loads
+        startConnection();
+
+        // Function to update the left table with data
+        function updateLeftTable(data) {
+            const tableBody = document.querySelector('#leftTable tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                const priceCell = document.createElement('td');
+                const amountCell = document.createElement('td');
+                const totalCell = document.createElement('td');
+
+                priceCell.textContent = item.price;
+                amountCell.textContent = item.amount;
+                totalCell.textContent = item.total;
+
+                row.appendChild(priceCell);
+                row.appendChild(amountCell);
+                row.appendChild(totalCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Function to update the right table with data
+        function updateRightTable(data) {
+    const tableBody = document.querySelector('#rightTable tbody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        const marketCell = document.createElement('td');
+        const changeCell = document.createElement('td');
+        const priceCell = document.createElement('td');
+
+        marketCell.textContent = item.market;
+        
+        // Add '+' icon before positive values of Change
+        changeCell.textContent = item.change >= 0 ? '+' + item.change : item.change;
+
+        priceCell.textContent = item.price;
+
+        row.appendChild(marketCell);
+        row.appendChild(changeCell);
+        row.appendChild(priceCell);
+
+        tableBody.appendChild(row);
+    });
+}
+
+    </script>
+</body>
+</html>
