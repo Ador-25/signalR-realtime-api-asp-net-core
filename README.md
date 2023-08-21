@@ -4,17 +4,7 @@
 
 This project demonstrates how to build a Realtime API using SignalR in ASP.NET Core.
 
-## Table of Contents
 
-- [Installation](#installation)
-- [Getting Started](#getting-started)
-- [Configuration](#configuration)
-- [Running the Project](#running-the-project)
-- [Screenshots](#screenshots)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
 
 ## Installation
 
@@ -22,3 +12,12 @@ This project demonstrates how to build a Realtime API using SignalR in ASP.NET C
 
 ```sh
 git clone https://github.com/your-username/signalR-realtime-api-asp-net-core.git
+```
+
+## Run
+
+1. Install Dotnet sdk and run
+
+```sh
+dotnet run
+```
